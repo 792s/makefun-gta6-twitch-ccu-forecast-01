@@ -196,7 +196,10 @@ def forecast_case(case, name):
     hours = []
     for row in case["forecast"]:
         h = row["hour"]
-        if pool:
+        # A pool day needs only >= 23 of 24 hours, so every member can be
+        # missing the same hour; the estimators would crash on an empty
+        # sample, so that hour alone falls back to the persistence shape.
+        if pool and any(h in day for day in pool):
             kq = knn_quantiles(p1, pool, h)
             rq = regression_quantiles(p1, pool, h)
             # 50/50 blend in log space, then back to viewers.
